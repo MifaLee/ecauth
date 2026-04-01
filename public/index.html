@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EC Login Demo</title>
+<style>
+  :root {
+    --primary: #4f6ef7;
+    --primary-dark: #3b57d9;
+    --bg: #f0f2f5;
+    --card-bg: #ffffff;
+    --text: #1a1a2e;
+    --text-secondary: #6b7280;
+    --border: #e5e7eb;
+    --success: #10b981;
+    --radius: 12px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.08);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-REDACTEDly: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+  }
+  .header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .header p {
+    font-size: 14px;
+    color: var(--text-secondary);
+  }
+  .login-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    margin-top: 80px;
+  }
+  .login-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 36px;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+  }
+  .login-btn:hover { background: var(--primary-dark); transform: translateY(-1px); }
+  .login-btn:active { transform: translateY(0); }
+  .login-btn svg { width: 20px; height: 20px; }
+  .card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 28px;
+    width: 100%;
+    max-width: 800px;
+    margin-bottom: 24px;
+  }
+  .card h2 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card h2 .badge {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 99px;
+    font-weight: 500;
+  }
+  .badge-token { background: #ede9fe; color: #7c3aed; }
+  .badge-user { background: #d1fae5; color: #059669; }
+  .info-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .info-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+    vertical-align: top;
+    word-break: break-all;
+  }
+  .info-table tr:last-child td { border-bottom: none; }
+  .info-table td:first-child {
+    width: 200px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    white-space: nowrap;
+  }
+  .info-table td:last-child { color: var(--text); }
+  .token-value {
+    font-REDACTEDly: 'SF Mono', 'Fira Code', monospace;
+    font-size: 13px;
+    background: #f8f9fa;
+    padding: 6px 10px;
+    border-radius: 6px;
+    display: inline-block;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+  .loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    margin-top: 80px;
+  }
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--border);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .error-box {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    max-width: 800px;
+    width: 100%;
+    margin-top: 40px;
+  }
+  .error-box h3 { color: #dc2626; margin-bottom: 8px; font-size: 16px; }
+  .error-box pre {
+    background: #fff;
+    padding: 12px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: 13px;
+    color: #7f1d1d;
+  }
+  .footer {
+    margin-top: 40px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    text-align: center;
+  }
+  .json-raw {
+    margin-top: 16px;
+  }
+  .json-toggle {
+    background: none;
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+  }
+  .json-toggle:hover { background: #f8f9fa; }
+  .json-block {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 16px;
+    font-REDACTEDly: 'SF Mono', 'Fira Code', monospace;
+    font-size: 12px;
+    white-space: pre-wrap;
+    word-break: break-all;
+    overflow-x: auto;
+    display: none;
+  }
+  .json-block.show { display: block; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>EC Login Demo</h1>
+  <p>EC OAuth2 (OIDC) Single Sign-On Demo</p>
+</div>
+
+<div id="app"></div>
+
+<script>
+const app = document.getElementById('app');
+
+function escapeHtml(str) {
+  if (typeof str !== 'string') return str;
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function formatValue(val) {
+  if (val === null || val === undefined) return '<span style="color:#9ca3af">null</span>';
+  if (typeof val === 'boolean') return val ? '<span style="color:#10b981">true</span>' : '<span style="color:#ef4444">false</span>';
+  if (typeof val === 'number') return `<span style="color:#6366f1">${val}</span>`;
+  if (typeof val === 'string') return `<span class="token-value">${escapeHtml(val)}</span>`;
+  return escapeHtml(JSON.stringify(val, null, 2));
+}
+
+function buildTable(obj, depth) {
+  if (!obj || typeof obj !== 'object') return '';
+  const entries = Object.entries(obj);
+  let html = '<table class="info-table">';
+  for (const [key, val] of entries) {
+    if (val && typeof val === 'object' && !Array.isArray(val) && depth < 2) {
+      html += `<tr><td>${escapeHtml(key)}</td><td>${buildTable(val, depth + 1)}</td></tr>`;
+    } else if (Array.isArray(val)) {
+      html += `<tr><td>${escapeHtml(key)}</td><td><span class="token-value">${escapeHtml(JSON.stringify(val, null, 2))}</span></td></tr>`;
+    } else {
+      html += `<tr><td>${escapeHtml(key)}</td><td>${formatValue(val)}</td></tr>`;
+    }
+  }
+  html += '</table>';
+  return html;
+}
+
+function render() {
+  const params = new URLSearchParams(window.location.search);
+  const dataStr = params.get('data');
+
+  if (!dataStr) {
+    app.innerHTML = `
+      <div class="login-container">
+        <p style="color:var(--text-secondary);font-size:15px;">Click below to login via EC OAuth2</p>
+        <button class="login-btn" onclick="location.href='/eclogindemo/auth/login'">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+            <polyline points="10 17 15 12 10 7"/>
+            <line x1="15" y1="12" x2="3" y2="12"/>
+          </svg>
+          Login with EC Account
+        </button>
+      </div>`;
+    return;
+  }
+
+  try {
+    const data = JSON.parse(decodeURIComponent(dataStr));
+    const { token, userinfo } = data;
+
+    if (token.error || userinfo.error) {
+      app.innerHTML = `
+        <div class="error-box">
+          <h3>OAuth2 Error</h3>
+          <pre>${escapeHtml(JSON.stringify(token.error ? token : userinfo, null, 2))}</pre>
+        </div>`;
+      return;
+    }
+
+    let html = '';
+
+    if (token) {
+      html += `
+      <div class="card">
+        <h2><span class="badge badge-token">Token</span> OAuth2 Token Response</h2>
+        ${buildTable(token, 0)}
+        <div class="json-raw">
+          <button class="json-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Toggle Raw JSON</button>
+          <div class="json-block">${escapeHtml(JSON.stringify(token, null, 2))}</div>
+        </div>
+      </div>`;
+    }
+
+    if (userinfo) {
+      html += `
+      <div class="card">
+        <h2><span class="badge badge-user">User</span> EC User Info</h2>
+        ${buildTable(userinfo, 0)}
+        <div class="json-raw">
+          <button class="json-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Toggle Raw JSON</button>
+          <div class="json-block">${escapeHtml(JSON.stringify(userinfo, null, 2))}</div>
+        </div>
+      </div>`;
+    }
+
+    html += `
+      <div style="text-align:center;margin-top:12px;">
+        <button class="login-btn" style="background:#6b7280;font-size:14px;padding:10px 24px;" onclick="location.href='/eclogindemo/auth/login'">
+          Re-Login
+        </button>
+      </div>`;
+
+    app.innerHTML = html;
+    window.history.replaceState({}, '', '/eclogindemo/');
+  } catch (e) {
+    app.innerHTML = `
+      <div class="error-box">
+        <h3>Parse Error</h3>
+        <pre>${escapeHtml(e.message)}</pre>
+      </div>`;
+  }
+}
+
+render();
+</script>
+
+<div class="footer">
+  EC Login Demo &copy; ${new Date().getFullYear()} &mdash; Powered by EC OAuth2 (OIDC)
+</div>
+</body>
+</html>

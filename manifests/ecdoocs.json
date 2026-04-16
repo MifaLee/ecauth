@@ -1,0 +1,22 @@
+{
+  "projectKey": "ecdoocs",
+  "name": "微信 Markdown 编辑器",
+  "description": "内部微信公众号 Markdown 编辑与发布工具",
+  "features": [
+    {
+      "key": "lexiang:knowledge-base",
+      "name": "乐享知识库",
+      "description": "允许从乐享知识库导入文档"
+    },
+    {
+      "key": "wechat:publish",
+      "name": "公众号文章发布",
+      "description": "允许将文章发布到微信公众号"
+    },
+    {
+      "key": "wechat:delete",
+      "name": "公众号文章删除",
+      "description": "允许删除已发布的公众号文章"
+    }
+  ]
+}

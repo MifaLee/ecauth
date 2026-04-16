@@ -1,0 +1,63 @@
+- generic [active] [ref=e1]:
+  - complementary [ref=e2]:
+    - generic [ref=e3]:
+      - heading "统一认证平台" [level=1] [ref=e4]
+      - generic [ref=e5]: Admin Console
+    - generic [ref=e6]:
+      - generic [ref=e7]: 管理员
+      - strong [ref=e8]: 未登录
+      - paragraph [ref=e9]: 加载中...
+    - list [ref=e10]:
+      - listitem [ref=e11]:
+        - button "■ 总览" [ref=e12] [cursor=pointer]:
+          - generic [ref=e13]: ■
+          - text: 总览
+      - listitem [ref=e14]:
+        - button "● 用户管理" [ref=e15] [cursor=pointer]:
+          - generic [ref=e16]: ●
+          - text: 用户管理
+      - listitem [ref=e17]:
+        - button "◆ 项目注册" [ref=e18] [cursor=pointer]:
+          - generic [ref=e19]: ◆
+          - text: 项目注册
+      - listitem [ref=e20]:
+        - button "▶ 组织管理" [ref=e21] [cursor=pointer]:
+          - generic [ref=e22]: ▶
+          - text: 组织管理
+    - link "返回平台首页" [ref=e24] [cursor=pointer]:
+      - /url: /ecauth/
+  - generic [ref=e25]:
+    - generic [ref=e26]:
+      - heading "总览" [level=2] [ref=e27]
+      - generic [ref=e28]:
+        - button "刷新" [ref=e29] [cursor=pointer]
+        - button "首页" [ref=e30] [cursor=pointer]
+        - button "退出登录" [ref=e31] [cursor=pointer]
+    - main [ref=e32]:
+      - generic [ref=e33]:
+        - generic [ref=e34]:
+          - article [ref=e35]:
+            - heading "统一认证管理后台" [level=3] [ref=e36]
+            - paragraph [ref=e37]: 管理用户审批与授权、项目功能目录、以及 EC 组织架构同步。组织同步会把 EC 成员预创建到本地，成员首次登录时直接匹配。
+            - generic [ref=e38]:
+              - button "去同步组织" [ref=e39] [cursor=pointer]
+              - button "去管理用户" [ref=e40] [cursor=pointer]
+          - article [ref=e41]:
+            - heading "运行状态" [level=3] [ref=e42]
+        - generic [ref=e43]:
+          - article [ref=e44]:
+            - generic [ref=e45]: 用户总数
+            - generic [ref=e46]: "0"
+            - generic [ref=e47]: 含组织同步预创建成员
+          - article [ref=e48]:
+            - generic [ref=e49]: 待审核
+            - generic [ref=e50]: "0"
+            - generic [ref=e51]: 未审批成员
+          - article [ref=e52]:
+            - generic [ref=e53]: 项目数量
+            - generic [ref=e54]: "0"
+            - generic [ref=e55]: 已注册功能目录
+          - article [ref=e56]:
+            - generic [ref=e57]: 已同步成员
+            - generic [ref=e58]: "0"
+            - generic [ref=e59]: 来自 EC 组织架构

@@ -1,6 +1,6 @@
 # EC OAuth2 SSO 单点登录集成开发指南
 
-> 基于 eclogindemo 项目的实战经验总结，供后续其它项目集成 EC SSO 时参考。
+> 基于 ecauth 项目的实战经验总结，供后续其它项目集成 EC SSO 时参考。
 
 ---
 
@@ -70,7 +70,7 @@ https://your-domain.com/api/ec-oauth/callback
 ### 3.1 目录结构
 
 ```
-eclogindemo/
+ecauth/
 ├── src/
 │   └── server.ts          # 服务端（Express），核心 OAuth2 逻辑
 ├── public/
@@ -241,12 +241,12 @@ error_description=The authorization server encountered an unexpected condition..
 
 ### 5.3 Nginx 回调路由配置
 
-如果回调 URL 和应用 URL 路径不同（例如回调用 `/api/ec-oauth/callback`，应用在 `/eclogindemo/`），需要在 Nginx 中单独配置 location：
+如果回调 URL 和应用 URL 路径不同（例如回调用 `/ecauth/auth/callback`，应用在 `/ecauth/`），需要在 Nginx 中单独配置 location：
 
 ```nginx
 # OAuth2 回调路由 - 精确匹配，代理到应用服务
-location = /api/ec-oauth/callback {
-    proxy_pass http://127.0.0.1:3008/eclogindemo/auth/callback;
+location = /ecauth/auth/callback {
+  proxy_pass http://127.0.0.1:3008/ecauth/auth/callback;
     proxy_http_version 1.1;
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
@@ -387,4 +387,4 @@ EC_REDIRECT_URI=https://your-domain.com/your-callback-path
 
 ---
 
-*最后更新：2026-03-31，基于 eclogindemo 项目实战调试总结*
+*最后更新：2026-03-31，基于 ecauth 项目实战调试总结*

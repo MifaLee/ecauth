@@ -3,317 +3,1122 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EC Login Demo</title>
+<title>EC Auth Platform</title>
 <style>
   :root {
-    --primary: #4f6ef7;
-    --primary-dark: #3b57d9;
-    --bg: #f0f2f5;
-    --card-bg: #ffffff;
-    --text: #1a1a2e;
-    --text-secondary: #6b7280;
-    --border: #e5e7eb;
-    --success: #10b981;
-    --radius: 12px;
-    --shadow: 0 4px 24px rgba(0,0,0,0.08);
+    --bg: #f4efe7;
+    --paper: rgba(255, 252, 247, 0.88);
+    --paper-strong: #fff9f1;
+    --line: rgba(90, 67, 40, 0.14);
+    --text: #241c15;
+    --muted: #6e6253;
+    --brand: #0e7c66;
+    --brand-strong: #095847;
+    --accent: #c96f2d;
+    --danger: #aa3c2f;
+    --shadow: 0 24px 80px rgba(75, 48, 26, 0.14);
+    --radius: 22px;
   }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  * { box-sizing: border-box; }
+
   body {
-    font-REDACTEDly: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: var(--bg);
-    color: var(--text);
+    margin: 0;
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 40px 20px;
-  }
-  .header {
-    text-align: center;
-    margin-bottom: 32px;
-  }
-  .header h1 {
-    font-size: 28px;
-    font-weight: 700;
     color: var(--text);
-    margin-bottom: 8px;
+    font-REDACTEDly: "Avenir Next", "PingFang SC", "Hiragino Sans GB", sans-serif;
+    background:
+      radial-gradient(circle at top left, rgba(201, 111, 45, 0.18), transparent 32%),
+      radial-gradient(circle at right 20%, rgba(14, 124, 102, 0.18), transparent 30%),
+      linear-gradient(180deg, #fbf6ef 0%, #efe5d6 100%);
   }
-  .header p {
-    font-size: 14px;
-    color: var(--text-secondary);
+
+  .shell {
+    width: min(1160px, calc(100% - 32px));
+    margin: 0 auto;
+    padding: 48px 0 56px;
   }
-  .login-container {
+
+  .hero {
+    position: relative;
+    overflow: hidden;
+    padding: 40px;
+    border: 1px solid var(--line);
+    border-radius: 32px;
+    background: linear-gradient(135deg, rgba(255, 249, 241, 0.92), rgba(250, 240, 226, 0.86));
+    box-shadow: var(--shadow);
+  }
+
+  .hero::after {
+    content: "";
+    position: absolute;
+    inset: auto -60px -80px auto;
+    width: 280px;
+    height: 280px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(14, 124, 102, 0.18), rgba(14, 124, 102, 0));
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: rgba(14, 124, 102, 0.1);
+    color: var(--brand-strong);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    margin: 18px 0 14px;
+    max-width: 780px;
+    font-REDACTEDly: Georgia, "Songti SC", serif;
+    font-size: clamp(36px, 6vw, 62px);
+    line-height: 1.04;
+    font-weight: 700;
+  }
+
+  .hero p {
+    max-width: 780px;
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.7;
+    color: var(--muted);
+  }
+
+  .hero-actions {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 24px;
-    margin-top: 80px;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 28px;
   }
-  .login-btn {
+
+  button, .ghost-link {
+    appearance: none;
+    border: 0;
+    border-radius: 999px;
+    padding: 13px 20px;
+    font: inherit;
+    cursor: pointer;
+    transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+  }
+
+  button:hover, .ghost-link:hover {
+    transform: translateY(-1px);
+  }
+
+  .primary {
+    background: var(--brand);
+    color: #fff;
+    box-shadow: 0 12px 24px rgba(14, 124, 102, 0.24);
+  }
+
+  .primary:hover {
+    background: var(--brand-strong);
+  }
+
+  .secondary {
+    background: rgba(36, 28, 21, 0.06);
+    color: var(--text);
+  }
+
+  .ghost-link {
     display: inline-flex;
     align-items: center;
-    gap: 10px;
-    padding: 14px 36px;
-    background: var(--primary);
-    color: #fff;
-    border: none;
-    border-radius: var(--radius);
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.1s;
+    text-decoration: none;
+    color: var(--accent);
+    background: rgba(201, 111, 45, 0.1);
   }
-  .login-btn:hover { background: var(--primary-dark); transform: translateY(-1px); }
-  .login-btn:active { transform: translateY(0); }
-  .login-btn svg { width: 20px; height: 20px; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 20px;
+    margin-top: 22px;
+  }
+
   .card {
-    background: var(--card-bg);
+    border: 1px solid var(--line);
     border-radius: var(--radius);
+    background: var(--paper);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
     box-shadow: var(--shadow);
-    padding: 28px;
-    width: 100%;
-    max-width: 800px;
-    margin-bottom: 24px;
+    padding: 26px;
   }
+
   .card h2 {
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 20px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    margin: 0 0 16px;
+    font-size: 20px;
   }
-  .card h2 .badge {
-    font-size: 11px;
-    padding: 2px 8px;
-    border-radius: 99px;
-    font-weight: 500;
+
+  .card p {
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.7;
   }
-  .badge-token { background: #ede9fe; color: #7c3aed; }
-  .badge-user { background: #d1fae5; color: #059669; }
-  .info-table {
-    width: 100%;
-    border-collapse: collapse;
+
+  .status-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 20px;
   }
-  .info-table td {
-    padding: 10px 12px;
-    border-bottom: 1px solid var(--border);
-    font-size: 14px;
-    vertical-align: top;
-    word-break: break-all;
+
+  .metric {
+    padding: 16px 18px;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: var(--paper-strong);
   }
-  .info-table tr:last-child td { border-bottom: none; }
-  .info-table td:first-child {
-    width: 200px;
-    font-weight: 600;
-    color: var(--text-secondary);
-    white-space: nowrap;
-  }
-  .info-table td:last-child { color: var(--text); }
-  .token-value {
-    font-REDACTEDly: 'SF Mono', 'Fira Code', monospace;
-    font-size: 13px;
-    background: #f8f9fa;
-    padding: 6px 10px;
-    border-radius: 6px;
-    display: inline-block;
-    max-width: 100%;
-    overflow-x: auto;
-  }
-  .loading {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
-    margin-top: 80px;
-  }
-  .spinner {
-    width: 40px;
-    height: 40px;
-    border: 3px solid var(--border);
-    border-top-color: var(--primary);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .error-box {
-    background: #fef2f2;
-    border: 1px solid #fecaca;
-    border-radius: var(--radius);
-    padding: 20px 24px;
-    max-width: 800px;
-    width: 100%;
-    margin-top: 40px;
-  }
-  .error-box h3 { color: #dc2626; margin-bottom: 8px; font-size: 16px; }
-  .error-box pre {
-    background: #fff;
-    padding: 12px;
-    border-radius: 8px;
-    overflow-x: auto;
-    font-size: 13px;
-    color: #7f1d1d;
-  }
-  .footer {
-    margin-top: 40px;
+
+  .metric-label {
+    display: block;
     font-size: 12px;
-    color: var(--text-secondary);
-    text-align: center;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
   }
-  .json-raw {
-    margin-top: 16px;
+
+  .metric-value {
+    display: block;
+    margin-top: 8px;
+    font-size: 22px;
+    font-weight: 700;
   }
-  .json-toggle {
-    background: none;
-    border: 1px solid var(--border);
-    padding: 6px 14px;
-    border-radius: 6px;
-    font-size: 13px;
-    cursor: pointer;
-    color: var(--text-secondary);
-    margin-bottom: 12px;
-  }
-  .json-toggle:hover { background: #f8f9fa; }
-  .json-block {
-    background: #f8f9fa;
-    border-radius: 8px;
-    padding: 16px;
-    font-REDACTEDly: 'SF Mono', 'Fira Code', monospace;
-    font-size: 12px;
-    white-space: pre-wrap;
-    word-break: break-all;
-    overflow-x: auto;
+
+  .message {
+    margin-top: 18px;
+    padding: 14px 16px;
+    border-radius: 16px;
+    border: 1px solid rgba(14, 124, 102, 0.18);
+    background: rgba(14, 124, 102, 0.08);
+    color: var(--brand-strong);
     display: none;
   }
-  .json-block.show { display: block; }
+
+  .message.error {
+    border-color: rgba(170, 60, 47, 0.18);
+    background: rgba(170, 60, 47, 0.08);
+    color: var(--danger);
+  }
+
+  .section-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
+  .tag {
+    display: inline-flex;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(36, 28, 21, 0.07);
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  .permission-list, .steps {
+    display: grid;
+    gap: 12px;
+  }
+
+  .admin-panel[hidden] {
+    display: none;
+  }
+
+  .admin-layout {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 20px;
+  }
+
+  .admin-column {
+    display: grid;
+    gap: 16px;
+  }
+
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .toolbar .secondary,
+  .mini-btn {
+    padding: 10px 14px;
+    border-radius: 14px;
+    font-size: 14px;
+  }
+
+  .mini-btn {
+    background: rgba(36, 28, 21, 0.06);
+    color: var(--text);
+  }
+
+  .mini-btn.danger {
+    background: rgba(170, 60, 47, 0.1);
+    color: var(--danger);
+  }
+
+  .admin-user-list,
+  .catalog-list {
+    display: grid;
+    gap: 14px;
+  }
+
+  .admin-user-card,
+  .catalog-item {
+    padding: 18px;
+    border-radius: 18px;
+    border: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.58);
+  }
+
+  .admin-user-header,
+  .catalog-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .admin-user-header h3,
+  .catalog-header h3 {
+    margin: 0;
+    font-size: 17px;
+  }
+
+  .subtle {
+    margin-top: 6px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .status-badges,
+  .inline-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .inline-tags {
+    margin-top: 12px;
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: rgba(36, 28, 21, 0.08);
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  .pill.success {
+    background: rgba(14, 124, 102, 0.12);
+    color: var(--brand-strong);
+  }
+
+  .pill.warning {
+    background: rgba(201, 111, 45, 0.14);
+    color: #9a571f;
+  }
+
+  .pill.danger {
+    background: rgba(170, 60, 47, 0.12);
+    color: var(--danger);
+  }
+
+  .admin-actions,
+  .grant-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  .grant-row {
+    align-items: end;
+  }
+
+  .field-grid {
+    display: grid;
+    gap: 12px;
+  }
+
+  .field-grid.two {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  label {
+    display: grid;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  input,
+  select,
+  textarea {
+    width: 100%;
+    border: 1px solid rgba(90, 67, 40, 0.18);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.92);
+    padding: 12px 14px;
+    color: var(--text);
+    font: inherit;
+  }
+
+  textarea {
+    min-height: 220px;
+    resize: vertical;
+    font-REDACTEDly: "SFMono-Regular", Consolas, monospace;
+    font-size: 13px;
+    line-height: 1.55;
+  }
+
+  .helper {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .empty-state {
+    padding: 18px;
+    border-radius: 18px;
+    border: 1px dashed rgba(90, 67, 40, 0.24);
+    color: var(--muted);
+    background: rgba(255, 255, 255, 0.44);
+  }
+
+  .permission-item, .step {
+    padding: 16px;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.5);
+  }
+
+  .permission-item h3, .step h3 {
+    margin: 0 0 8px;
+    font-size: 16px;
+  }
+
+  .permission-item p, .step p {
+    margin: 0;
+    color: var(--muted);
+  }
+
+  .feature-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .feature-tags span {
+    display: inline-flex;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(14, 124, 102, 0.1);
+    color: var(--brand-strong);
+    font-size: 13px;
+  }
+
+  pre {
+    margin: 0;
+    padding: 16px;
+    overflow: auto;
+    border-radius: 18px;
+    background: #1d1813;
+    color: #f6efe6;
+    font-REDACTEDly: "SFMono-Regular", Consolas, monospace;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .fade-up {
+    animation: fade-up 420ms ease both;
+  }
+
+  .delay-1 {
+    animation-delay: 80ms;
+  }
+
+  .delay-2 {
+    animation-delay: 160ms;
+  }
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(18px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (max-width: 900px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+
+    .admin-layout,
+    .field-grid.two {
+      grid-template-columns: 1fr;
+    }
+
+    .hero {
+      padding: 28px;
+    }
+
+    .status-grid {
+      grid-template-columns: 1fr;
+    }
+  }
 </style>
 </head>
 <body>
+<main class="shell">
+  <section class="hero fade-up">
+    <span class="eyebrow">EC Unified Access Platform</span>
+    <h1>一个统一承载 EC SSO、用户审批与功能授权的基础平台</h1>
+    <p>当前页面用于验证登录态、查看账号状态与权限清单。后续子项目只需要在这里注册项目和功能，再通过统一接口校验权限或签发项目令牌。</p>
+    <div class="hero-actions" id="hero-actions"></div>
+    <div class="message" id="message-box"></div>
+  </section>
 
-<div class="header">
-  <h1>EC Login Demo</h1>
-  <p>EC OAuth2 (OIDC) Single Sign-On Demo</p>
-</div>
+  <section class="grid fade-up delay-1">
+    <article class="card">
+      <div class="section-title">
+        <h2>当前账号</h2>
+        <span class="tag" id="auth-tag">未登录</span>
+      </div>
+      <p id="user-summary">使用 EC 账号登录后，系统会自动创建本地用户。首次登录状态为待审核，管理员审批后才能访问具体业务功能。</p>
+      <div class="status-grid" id="status-grid">
+        <div class="metric"><span class="metric-label">登录状态</span><span class="metric-value">未登录</span></div>
+        <div class="metric"><span class="metric-label">账号状态</span><span class="metric-value">-</span></div>
+        <div class="metric"><span class="metric-label">管理员</span><span class="metric-value">-</span></div>
+        <div class="metric"><span class="metric-label">最近登录</span><span class="metric-value">-</span></div>
+      </div>
+    </article>
 
-<div id="app"></div>
+    <article class="card">
+      <div class="section-title">
+        <h2>接入路径</h2>
+        <span class="tag">3 steps</span>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <h3>1. 注册项目清单</h3>
+          <p>为新子项目提供唯一的 projectKey，并定义 featureKey 清单，统一注册到权限中心。</p>
+        </div>
+        <div class="step">
+          <h3>2. 分配用户权限</h3>
+          <p>管理员审批用户后，为用户授予具体功能权限，授权边界落到 feature 级别。</p>
+        </div>
+        <div class="step">
+          <h3>3. 子项目校验访问</h3>
+          <p>子项目可调用统一接口检查权限，或申请带项目范围的短期令牌。</p>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <section class="grid fade-up delay-2">
+    <article class="card">
+      <div class="section-title">
+        <h2>权限视图</h2>
+        <span class="tag" id="permission-count">0 projects</span>
+      </div>
+      <div class="permission-list" id="permission-list">
+        <div class="permission-item">
+          <h3>暂无权限数据</h3>
+          <p>登录后会显示你可访问的项目与功能。如果你是管理员，这里会展示完整项目目录。</p>
+        </div>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="section-title">
+        <h2>Manifest 示例</h2>
+        <span class="tag">project:register</span>
+      </div>
+      <pre>{
+  "projectKey": "sales-crm",
+  "name": "销售 CRM",
+  "description": "销售团队线索与客户运营功能",
+  "features": [
+    { "key": "dashboard:view", "name": "查看销售看板" },
+    { "key": "customer:edit", "name": "编辑客户资料" },
+    { "key": "report:export", "name": "导出销售报表" }
+  ]
+}</pre>
+    </article>
+  </section>
+
+  <section class="card admin-panel fade-up delay-2" id="admin-panel" hidden>
+    <div class="section-title">
+      <h2>管理员控制台</h2>
+      <div class="toolbar">
+        <span class="tag">审批 · 授权 · 项目注册</span>
+        <button class="secondary" id="refresh-admin" type="button">刷新数据</button>
+      </div>
+    </div>
+    <div class="admin-layout">
+      <div class="admin-column">
+        <article>
+          <div class="section-title">
+            <h2>用户审批与授权</h2>
+            <span class="tag" id="admin-user-count">0 users</span>
+          </div>
+          <div class="admin-user-list" id="admin-user-list">
+            <div class="empty-state">当前没有可展示的用户数据。</div>
+          </div>
+        </article>
+      </div>
+      <div class="admin-column">
+        <article>
+          <div class="section-title">
+            <h2>注册新项目</h2>
+            <span class="tag" id="admin-project-count">0 projects</span>
+          </div>
+          <form class="field-grid" id="project-manifest-form">
+            <label>
+              项目 manifest JSON
+              <textarea id="project-manifest-input">{
+  "projectKey": "sales-crm",
+  "name": "销售 CRM",
+  "description": "销售团队线索与客户运营功能",
+  "features": [
+    { "key": "dashboard:view", "name": "查看销售看板" },
+    { "key": "customer:edit", "name": "编辑客户资料" }
+  ]
+}</textarea>
+            </label>
+            <div class="helper">提交后会自动 upsert 项目和功能定义，已有功能会更新显示名称与描述。</div>
+            <div class="toolbar">
+              <button class="primary" type="submit">注册项目</button>
+            </div>
+          </form>
+        </article>
+        <article>
+          <div class="section-title">
+            <h2>项目目录</h2>
+            <span class="tag">active catalog</span>
+          </div>
+          <div class="catalog-list" id="catalog-list">
+            <div class="empty-state">项目目录为空，请先注册项目。</div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+</main>
 
 <script>
-const app = document.getElementById('app');
+  const basePath = '/ecauth';
+  const state = {
+    session: null,
+    users: [],
+    projects: [],
+  };
+  const messageBox = document.getElementById('message-box');
+  const heroActions = document.getElementById('hero-actions');
+  const authTag = document.getElementById('auth-tag');
+  const userSummary = document.getElementById('user-summary');
+  const statusGrid = document.getElementById('status-grid');
+  const permissionCount = document.getElementById('permission-count');
+  const permissionList = document.getElementById('permission-list');
+  const adminPanel = document.getElementById('admin-panel');
+  const adminUserCount = document.getElementById('admin-user-count');
+  const adminUserList = document.getElementById('admin-user-list');
+  const adminProjectCount = document.getElementById('admin-project-count');
+  const catalogList = document.getElementById('catalog-list');
+  const refreshAdminButton = document.getElementById('refresh-admin');
+  const projectManifestForm = document.getElementById('project-manifest-form');
+  const projectManifestInput = document.getElementById('project-manifest-input');
 
-function escapeHtml(str) {
-  if (typeof str !== 'string') return str;
-  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
+  function escapeHtml(value) {
+    return String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
 
-function formatValue(val) {
-  if (val === null || val === undefined) return '<span style="color:#9ca3af">null</span>';
-  if (typeof val === 'boolean') return val ? '<span style="color:#10b981">true</span>' : '<span style="color:#ef4444">false</span>';
-  if (typeof val === 'number') return `<span style="color:#6366f1">${val}</span>`;
-  if (typeof val === 'string') return `<span class="token-value">${escapeHtml(val)}</span>`;
-  return escapeHtml(JSON.stringify(val, null, 2));
-}
+  async function apiRequest(path, options) {
+    const response = await fetch(basePath + path, {
+      credentials: 'same-origin',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      ...options,
+    });
 
-function buildTable(obj, depth) {
-  if (!obj || typeof obj !== 'object') return '';
-  const entries = Object.entries(obj);
-  let html = '<table class="info-table">';
-  for (const [key, val] of entries) {
-    if (val && typeof val === 'object' && !Array.isArray(val) && depth < 2) {
-      html += `<tr><td>${escapeHtml(key)}</td><td>${buildTable(val, depth + 1)}</td></tr>`;
-    } else if (Array.isArray(val)) {
-      html += `<tr><td>${escapeHtml(key)}</td><td><span class="token-value">${escapeHtml(JSON.stringify(val, null, 2))}</span></td></tr>`;
-    } else {
-      html += `<tr><td>${escapeHtml(key)}</td><td>${formatValue(val)}</td></tr>`;
+    const text = await response.text();
+    const payload = text ? JSON.parse(text) : {};
+    if (!response.ok) {
+      throw new Error(payload.error || '请求失败');
     }
-  }
-  html += '</table>';
-  return html;
-}
 
-function render() {
-  const params = new URLSearchParams(window.location.search);
-  const dataStr = params.get('data');
-
-  if (!dataStr) {
-    app.innerHTML = `
-      <div class="login-container">
-        <p style="color:var(--text-secondary);font-size:15px;">Click below to login via EC OAuth2</p>
-        <button class="login-btn" onclick="location.href='/eclogindemo/auth/login'">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
-            <polyline points="10 17 15 12 10 7"/>
-            <line x1="15" y1="12" x2="3" y2="12"/>
-          </svg>
-          Login with EC Account
-        </button>
-      </div>`;
-    return;
+    return payload;
   }
 
-  try {
-    const data = JSON.parse(decodeURIComponent(dataStr));
-    const { token, userinfo } = data;
+  function getParam(name) {
+    return new URLSearchParams(window.location.search).get(name);
+  }
 
-    if (token.error || userinfo.error) {
-      app.innerHTML = `
-        <div class="error-box">
-          <h3>OAuth2 Error</h3>
-          <pre>${escapeHtml(JSON.stringify(token.error ? token : userinfo, null, 2))}</pre>
+  function showMessage(text, isError) {
+    if (!text) {
+      messageBox.style.display = 'none';
+      messageBox.textContent = '';
+      messageBox.classList.remove('error');
+      return;
+    }
+
+    messageBox.style.display = 'block';
+    messageBox.textContent = text;
+    messageBox.classList.toggle('error', Boolean(isError));
+  }
+
+  function formatTime(value) {
+    if (!value) {
+      return '-';
+    }
+    return new Date(value).toLocaleString('zh-CN');
+  }
+
+  function renderActions(authenticated) {
+    heroActions.innerHTML = '';
+
+    if (!authenticated) {
+      const login = document.createElement('button');
+      login.className = 'primary';
+      login.textContent = '使用 EC 账号登录';
+      login.addEventListener('click', function () {
+        window.location.href = basePath + '/auth/login';
+      });
+      heroActions.appendChild(login);
+      return;
+    }
+
+    const logout = document.createElement('button');
+    logout.className = 'secondary';
+    logout.textContent = '退出登录';
+    logout.addEventListener('click', async function () {
+      await fetch(basePath + '/auth/logout', { method: 'POST' });
+      window.location.href = basePath + '/';
+    });
+
+    const apiLink = document.createElement('a');
+    apiLink.className = 'ghost-link';
+    apiLink.href = basePath + '/api/auth/me';
+    apiLink.target = '_blank';
+    apiLink.rel = 'noreferrer';
+    apiLink.textContent = '查看当前会话 JSON';
+
+    const adminLink = document.createElement('a');
+    adminLink.className = 'ghost-link';
+    adminLink.href = basePath + '/admin';
+    adminLink.textContent = '打开管理后台';
+
+    heroActions.appendChild(logout);
+    heroActions.appendChild(apiLink);
+    heroActions.appendChild(adminLink);
+  }
+
+  function formatStatus(status) {
+    const map = {
+      pending_review: '待审核',
+      active: '已启用',
+      rejected: '已拒绝',
+      disabled: '已停用',
+    };
+    return map[status] || status;
+  }
+
+  function statusClass(status) {
+    if (status === 'active') {
+      return 'success';
+    }
+    if (status === 'pending_review') {
+      return 'warning';
+    }
+    return 'danger';
+  }
+
+  function renderStatusCard(payload) {
+    if (!payload.authenticated) {
+      authTag.textContent = '未登录';
+      userSummary.textContent = '使用 EC 账号登录后，系统会自动创建本地用户。首次登录状态为待审核，管理员审批后才能访问具体业务功能。';
+      statusGrid.innerHTML = `
+        <div class="metric"><span class="metric-label">登录状态</span><span class="metric-value">未登录</span></div>
+        <div class="metric"><span class="metric-label">账号状态</span><span class="metric-value">-</span></div>
+        <div class="metric"><span class="metric-label">管理员</span><span class="metric-value">-</span></div>
+        <div class="metric"><span class="metric-label">最近登录</span><span class="metric-value">-</span></div>`;
+      return;
+    }
+
+    const user = payload.user;
+    authTag.textContent = user.displayName;
+    userSummary.textContent = `${user.displayName}${user.email ? ' / ' + user.email : ''}${user.employeeId ? ' / 工号 ' + user.employeeId : ''}`;
+    statusGrid.innerHTML = `
+      <div class="metric"><span class="metric-label">登录状态</span><span class="metric-value">已登录</span></div>
+      <div class="metric"><span class="metric-label">账号状态</span><span class="metric-value">${user.status}</span></div>
+      <div class="metric"><span class="metric-label">管理员</span><span class="metric-value">${user.isAdmin ? '是' : '否'}</span></div>
+      <div class="metric"><span class="metric-label">最近登录</span><span class="metric-value">${formatTime(user.lastLoginAt)}</span></div>`;
+  }
+
+  function renderPermissions(payload) {
+    const projects = payload.permissions ? payload.permissions.projects : [];
+    permissionCount.textContent = projects.length + ' projects';
+
+    if (!projects.length) {
+      permissionList.innerHTML = `
+        <div class="permission-item">
+          <h3>暂无可用项目</h3>
+          <p>${payload.authenticated ? '当前账号还没有被授权任何功能，或仍在待审核状态。' : '请先登录。'}</p>
         </div>`;
       return;
     }
 
-    let html = '';
-
-    if (token) {
-      html += `
-      <div class="card">
-        <h2><span class="badge badge-token">Token</span> OAuth2 Token Response</h2>
-        ${buildTable(token, 0)}
-        <div class="json-raw">
-          <button class="json-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Toggle Raw JSON</button>
-          <div class="json-block">${escapeHtml(JSON.stringify(token, null, 2))}</div>
-        </div>
-      </div>`;
-    }
-
-    if (userinfo) {
-      html += `
-      <div class="card">
-        <h2><span class="badge badge-user">User</span> EC User Info</h2>
-        ${buildTable(userinfo, 0)}
-        <div class="json-raw">
-          <button class="json-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Toggle Raw JSON</button>
-          <div class="json-block">${escapeHtml(JSON.stringify(userinfo, null, 2))}</div>
-        </div>
-      </div>`;
-    }
-
-    html += `
-      <div style="text-align:center;margin-top:12px;">
-        <button class="login-btn" style="background:#6b7280;font-size:14px;padding:10px 24px;" onclick="location.href='/eclogindemo/auth/login'">
-          Re-Login
-        </button>
-      </div>`;
-
-    app.innerHTML = html;
-    window.history.replaceState({}, '', '/eclogindemo/');
-  } catch (e) {
-    app.innerHTML = `
-      <div class="error-box">
-        <h3>Parse Error</h3>
-        <pre>${escapeHtml(e.message)}</pre>
-      </div>`;
+    permissionList.innerHTML = projects.map(function (project) {
+      return `
+        <div class="permission-item">
+          <h3>${project.projectName}</h3>
+          <p>projectKey: ${project.projectKey}</p>
+          <div class="feature-tags">
+            ${project.features.map(function (feature) {
+              return '<span>' + feature.featureKey + '</span>';
+            }).join('')}
+          </div>
+        </div>`;
+    }).join('');
   }
-}
 
-render();
+  function renderCatalog() {
+    adminProjectCount.textContent = state.projects.length + ' projects';
+
+    if (!state.projects.length) {
+      catalogList.innerHTML = '<div class="empty-state">项目目录为空，请先注册项目。</div>';
+      return;
+    }
+
+    catalogList.innerHTML = state.projects.map(function (project) {
+      return `
+        <div class="catalog-item">
+          <div class="catalog-header">
+            <div>
+              <h3>${escapeHtml(project.projectName)}</h3>
+              <div class="subtle">projectKey: ${escapeHtml(project.projectKey)}</div>
+            </div>
+            <span class="pill success">${project.features.length} features</span>
+          </div>
+          <div class="inline-tags">
+            ${project.features.map(function (feature) {
+              return '<span class="pill">' + escapeHtml(feature.featureKey) + '</span>';
+            }).join('')}
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function featureOptions(projectKey, selectedValue) {
+    const project = state.projects.find(function (item) {
+      return item.projectKey === projectKey;
+    });
+    const features = project ? project.features : [];
+
+    if (!features.length) {
+      return '<option value="">暂无可授权功能</option>';
+    }
+
+    return features.map(function (feature) {
+      const selected = feature.featureKey === selectedValue ? ' selected' : '';
+      return '<option value="' + escapeHtml(feature.featureKey) + '"' + selected + '>' + escapeHtml(feature.featureKey) + '</option>';
+    }).join('');
+  }
+
+  function projectOptions(selectedValue) {
+    if (!state.projects.length) {
+      return '<option value="">暂无项目</option>';
+    }
+
+    return state.projects.map(function (project) {
+      const selected = project.projectKey === selectedValue ? ' selected' : '';
+      return '<option value="' + escapeHtml(project.projectKey) + '"' + selected + '>' + escapeHtml(project.projectName) + ' / ' + escapeHtml(project.projectKey) + '</option>';
+    }).join('');
+  }
+
+  function renderAdminUsers() {
+    adminUserCount.textContent = state.users.length + ' users';
+
+    if (!state.users.length) {
+      adminUserList.innerHTML = '<div class="empty-state">当前没有可展示的用户数据。</div>';
+      return;
+    }
+
+    adminUserList.innerHTML = state.users.map(function (user) {
+      const currentProject = state.projects[0] ? state.projects[0].projectKey : '';
+      const currentFeature = state.projects[0] && state.projects[0].features[0] ? state.projects[0].features[0].featureKey : '';
+      const grants = user.permissions && user.permissions.projects
+        ? user.permissions.projects.map(function (project) {
+            return project.features.map(function (feature) {
+              return {
+                projectKey: project.projectKey,
+                featureKey: feature.featureKey,
+              };
+            });
+          }).flat()
+        : [];
+
+      return `
+        <div class="admin-user-card" data-user-id="${escapeHtml(user.id)}">
+          <div class="admin-user-header">
+            <div>
+              <h3>${escapeHtml(user.displayName)}</h3>
+              <div class="subtle">${escapeHtml(user.email || user.mobile || user.employeeId || user.id)}</div>
+            </div>
+            <div class="status-badges">
+              <span class="pill ${statusClass(user.status)}">${escapeHtml(formatStatus(user.status))}</span>
+              ${user.isAdmin ? '<span class="pill success">管理员</span>' : '<span class="pill">普通用户</span>'}
+            </div>
+          </div>
+          <div class="inline-tags">
+            <span class="pill">最近登录: ${escapeHtml(formatTime(user.lastLoginAt))}</span>
+            ${user.reviewNote ? '<span class="pill">备注: ' + escapeHtml(user.reviewNote) + '</span>' : ''}
+          </div>
+          <div class="admin-actions">
+            <button class="mini-btn" type="button" data-action="approve">通过</button>
+            <button class="mini-btn danger" type="button" data-action="reject">拒绝</button>
+            <button class="mini-btn" type="button" data-action="disable">停用</button>
+            <button class="mini-btn" type="button" data-action="toggle-admin">${user.isAdmin ? '取消管理员' : '设为管理员'}</button>
+          </div>
+          <form class="grant-form" data-user-id="${escapeHtml(user.id)}">
+            <div class="grant-row field-grid two">
+              <label>
+                项目
+                <select name="projectKey">${projectOptions(currentProject)}</select>
+              </label>
+              <label>
+                功能
+                <select name="featureKey">${featureOptions(currentProject, currentFeature)}</select>
+              </label>
+            </div>
+            <div class="toolbar">
+              <button class="primary" type="submit">授予功能</button>
+            </div>
+          </form>
+          <div class="inline-tags">
+            ${grants.length
+              ? grants.map(function (grant) {
+                  return '<button class="mini-btn" type="button" data-action="revoke-feature" data-project-key="' + escapeHtml(grant.projectKey) + '" data-feature-key="' + escapeHtml(grant.featureKey) + '">' + escapeHtml(grant.projectKey + ' / ' + grant.featureKey) + '</button>';
+                }).join('')
+              : '<span class="pill">暂无已授予功能</span>'}
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function renderAdminPanel() {
+    const user = state.session && state.session.user;
+    const enabled = Boolean(state.session && state.session.authenticated && user && user.isAdmin && user.status === 'active');
+    adminPanel.hidden = !enabled;
+
+    if (!enabled) {
+      return;
+    }
+
+    renderCatalog();
+    renderAdminUsers();
+  }
+
+  async function loadAdminData() {
+    const user = state.session && state.session.user;
+    if (!(state.session && state.session.authenticated && user && user.isAdmin && user.status === 'active')) {
+      state.users = [];
+      state.projects = [];
+      renderAdminPanel();
+      return;
+    }
+
+    const [usersPayload, projectsPayload] = await Promise.all([
+      apiRequest('/api/admin/users'),
+      apiRequest('/api/admin/projects'),
+    ]);
+    state.users = usersPayload.users || [];
+    state.projects = projectsPayload.projects || [];
+    renderAdminPanel();
+  }
+
+  async function loadSession() {
+    const response = await fetch(basePath + '/api/auth/status', { credentials: 'same-origin' });
+    const payload = await response.json();
+    state.session = payload;
+    renderActions(payload.authenticated);
+    renderStatusCard(payload);
+    renderPermissions(payload);
+    renderAdminPanel();
+  }
+
+  async function refreshAll() {
+    await loadSession();
+    await loadAdminData();
+  }
+
+  async function updateUserReview(userId, action) {
+    await apiRequest('/api/admin/users/' + encodeURIComponent(userId) + '/review', {
+      method: 'POST',
+      body: JSON.stringify({ action }),
+    });
+  }
+
+  async function updateUserAdmin(userId, isAdmin) {
+    await apiRequest('/api/admin/users/' + encodeURIComponent(userId) + '/admin', {
+      method: 'POST',
+      body: JSON.stringify({ isAdmin }),
+    });
+  }
+
+  async function grantFeature(userId, projectKey, featureKey) {
+    await apiRequest('/api/admin/users/' + encodeURIComponent(userId) + '/grants', {
+      method: 'POST',
+      body: JSON.stringify({
+        grants: [{ projectKey, featureKey }],
+      }),
+    });
+  }
+
+  async function revokeFeature(userId, projectKey, featureKey) {
+    await apiRequest('/api/admin/users/' + encodeURIComponent(userId) + '/grants', {
+      method: 'DELETE',
+      body: JSON.stringify({
+        grants: [{ projectKey, featureKey }],
+      }),
+    });
+  }
+
+  adminUserList.addEventListener('change', function (event) {
+    const target = event.target;
+    if (!(target instanceof HTMLSelectElement) || target.name !== 'projectKey') {
+      return;
+    }
+
+    const form = target.closest('form');
+    const featureSelect = form ? form.querySelector('select[name="featureKey"]') : null;
+    if (!(featureSelect instanceof HTMLSelectElement)) {
+      return;
+    }
+
+    featureSelect.innerHTML = featureOptions(target.value, '');
+  });
+
+  adminUserList.addEventListener('click', async function (event) {
+    const target = event.target;
+    if (!(target instanceof HTMLButtonElement)) {
+      return;
+    }
+
+    const card = target.closest('[data-user-id]');
+    const userId = card ? card.getAttribute('data-user-id') : '';
+    const action = target.getAttribute('data-action');
+    if (!userId || !action) {
+      return;
+    }
+
+    try {
+      if (action === 'approve' || action === 'reject' || action === 'disable') {
+        await updateUserReview(userId, action);
+      } else if (action === 'toggle-admin') {
+        const user = state.users.find(function (item) { return item.id === userId; });
+        await updateUserAdmin(userId, !(user && user.isAdmin));
+      } else if (action === 'revoke-feature') {
+        const projectKey = target.getAttribute('data-project-key');
+        const featureKey = target.getAttribute('data-feature-key');
+        if (!projectKey || !featureKey) {
+          return;
+        }
+        await revokeFeature(userId, projectKey, featureKey);
+      } else {
+        return;
+      }
+
+      showMessage('管理员操作已完成', false);
+      await refreshAll();
+    } catch (requestError) {
+      showMessage(requestError.message || '管理员操作失败', true);
+    }
+  });
+
+  adminUserList.addEventListener('submit', async function (event) {
+    const target = event.target;
+    if (!(target instanceof HTMLFormElement) || !target.classList.contains('grant-form')) {
+      return;
+    }
+
+    event.preventDefault();
+    const userId = target.getAttribute('data-user-id');
+    const projectField = target.querySelector('select[name="projectKey"]');
+    const featureField = target.querySelector('select[name="featureKey"]');
+    if (!(projectField instanceof HTMLSelectElement) || !(featureField instanceof HTMLSelectElement) || !userId) {
+      return;
+    }
+
+    try {
+      await grantFeature(userId, projectField.value, featureField.value);
+      showMessage('功能授权已完成', false);
+      await refreshAll();
+    } catch (requestError) {
+      showMessage(requestError.message || '功能授权失败', true);
+    }
+  });
+
+  refreshAdminButton.addEventListener('click', async function () {
+    try {
+      await refreshAll();
+      showMessage('管理员数据已刷新', false);
+    } catch (requestError) {
+      showMessage(requestError.message || '刷新失败', true);
+    }
+  });
+
+  projectManifestForm.addEventListener('submit', async function (event) {
+    event.preventDefault();
+    try {
+      const manifest = JSON.parse(projectManifestInput.value);
+      await apiRequest('/api/admin/projects/register', {
+        method: 'POST',
+        body: JSON.stringify(manifest),
+      });
+      showMessage('项目已注册并同步到目录', false);
+      await refreshAll();
+    } catch (requestError) {
+      showMessage(requestError.message || '项目注册失败', true);
+    }
+  });
+
+  async function boot() {
+    const message = getParam('message');
+    const error = getParam('error');
+    showMessage(error || message, Boolean(error));
+    renderActions(false);
+
+    try {
+      await refreshAll();
+    } catch (requestError) {
+      showMessage('无法获取当前会话状态，请检查服务端是否正常运行。', true);
+    }
+  }
+
+  boot();
 </script>
-
-<div class="footer">
-  EC Login Demo &copy; ${new Date().getFullYear()} &mdash; Powered by EC OAuth2 (OIDC)
-</div>
 </body>
 </html>

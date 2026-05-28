@@ -30,6 +30,7 @@ function mapUser(user: UserRecord) {
     displayName: user.display_name,
     status: user.status,
     isAdmin: user.is_admin,
+    adminPermissionMode: user.admin_permission_mode ?? 'all',
     provisionSource: user.provision_source,
     reviewNote: user.review_note,
     approvedAt: user.approved_at,
@@ -69,6 +70,10 @@ function groupPermissionRows(rows: UserPermissionRow[]): AccessProfile {
     isAdmin: false,
     projects: [...projects.values()],
   };
+}
+
+function adminHasCustomPermissions(user: UserRecord): boolean {
+  return user.is_admin && user.admin_permission_mode === 'custom';
 }
 
 async function buildDeptPathMap(): Promise<Map<string, string>> {
@@ -343,8 +348,13 @@ export async function linkOrgMemberToUser(params: {
 
 export async function getAccessProfileForUser(user: UserRecord): Promise<AccessProfile> {
   if (user.is_admin) {
+    if (adminHasCustomPermissions(user)) {
+      const profile = groupPermissionRows(await listUserPermissionRows(user.id));
+      return { ...profile, isAdmin: true, adminPermissionMode: 'custom' };
+    }
     return {
       isAdmin: true,
+      adminPermissionMode: 'all',
       projects: await listProjectCatalog(),
     };
   }
@@ -413,7 +423,11 @@ export async function listUsersWithPermissions(filters?: {
   return usersResult.rows.map((user) => ({
     ...mapUser(user),
     deptPath: user.ec_dept_id ? (deptPathMap.get(String(user.ec_dept_id)) ?? '') : '',
-    permissions: user.is_admin ? { isAdmin: true, projects: adminCatalog } : groupPermissionRows(grouped.get(user.id) ?? []),
+    permissions: user.is_admin
+      ? adminHasCustomPermissions(user)
+        ? { ...groupPermissionRows(grouped.get(user.id) ?? []), isAdmin: true, adminPermissionMode: 'custom' }
+        : { isAdmin: true, adminPermissionMode: 'all', projects: adminCatalog }
+      : groupPermissionRows(grouped.get(user.id) ?? []),
   }));
 }
 
@@ -518,7 +532,9 @@ export async function setUserAdmin(params: { userId: string; isAdmin: boolean; a
     const result = await client.query<UserRecord>(
       `
         UPDATE users
-        SET is_admin = $2, updated_at = NOW()
+        SET is_admin = $2,
+            admin_permission_mode = CASE WHEN $2 = TRUE THEN admin_permission_mode ELSE 'all' END,
+            updated_at = NOW()
         WHERE id = $1
         RETURNING *
       `,
@@ -585,6 +601,10 @@ export async function grantFeatures(params: {
     }
 
     const featureIds = await resolveFeatureIds(client, params.grants);
+    if (user.is_admin) {
+      await client.query('UPDATE users SET admin_permission_mode = $2, updated_at = NOW() WHERE id = $1', [params.userId, 'custom']);
+      user.admin_permission_mode = 'custom';
+    }
     for (const featureId of featureIds) {
       await client.query(
         `
@@ -627,8 +647,12 @@ export async function grantFeaturesBatch(params: {
     const featureIds = await resolveFeatureIds(client, params.grants);
     for (const userId of params.userIds) {
       const userResult = await client.query<UserRecord>('SELECT * FROM users WHERE id = $1 LIMIT 1', [userId]);
-      if (!userResult.rows[0]) {
+      const user = userResult.rows[0];
+      if (!user) {
         throw new NotFoundError(`User not found: ${userId}`);
+      }
+      if (user.is_admin) {
+        await client.query('UPDATE users SET admin_permission_mode = $2, updated_at = NOW() WHERE id = $1', [userId, 'custom']);
       }
 
       for (const featureId of featureIds) {
@@ -676,6 +700,11 @@ export async function revokeFeatures(params: {
     for (const featureId of featureIds) {
       await client.query('DELETE FROM user_feature_grants WHERE user_id = $1 AND feature_id = $2', [params.userId, featureId]);
     }
+    if (user.is_admin) {
+      const hasGrants = await client.query<{ exists: boolean }>('SELECT EXISTS (SELECT 1 FROM user_feature_grants WHERE user_id = $1) AS exists', [params.userId]);
+      await client.query('UPDATE users SET admin_permission_mode = $2, updated_at = NOW() WHERE id = $1', [params.userId, hasGrants.rows[0]?.exists ? 'custom' : 'all']);
+      user.admin_permission_mode = hasGrants.rows[0]?.exists ? 'custom' : 'all';
+    }
 
     await recordAuditLog({
       client,
@@ -713,6 +742,11 @@ export async function revokeFeaturesBatch(params: {
       for (const featureId of featureIds) {
         await client.query('DELETE FROM user_feature_grants WHERE user_id = $1 AND feature_id = $2', [userId, featureId]);
       }
+      const user = userResult.rows[0];
+      if (user.is_admin) {
+        const hasGrants = await client.query<{ exists: boolean }>('SELECT EXISTS (SELECT 1 FROM user_feature_grants WHERE user_id = $1) AS exists', [userId]);
+        await client.query('UPDATE users SET admin_permission_mode = $2, updated_at = NOW() WHERE id = $1', [userId, hasGrants.rows[0]?.exists ? 'custom' : 'all']);
+      }
 
       await recordAuditLog({
         client,
@@ -734,6 +768,21 @@ export async function hasFeatureAccess(user: UserRecord, projectKey: string, fea
   }
 
   if (user.is_admin) {
+    if (adminHasCustomPermissions(user)) {
+      const result = await query<{ allowed: boolean }>(
+        `
+          SELECT EXISTS (
+            SELECT 1
+            FROM user_feature_grants ug
+            JOIN features f ON f.id = ug.feature_id
+            JOIN projects p ON p.id = f.project_id
+            WHERE ug.user_id = $1 AND p.project_key = $2 AND f.feature_key = $3 AND p.status = 'active' AND f.status = 'active'
+          ) AS allowed
+        `,
+        [user.id, projectKey, featureKey],
+      );
+      return Boolean(result.rows[0]?.allowed);
+    }
     try {
       const featureKeys = await listProjectFeatureKeys(projectKey);
       return featureKeys.includes(featureKey);
@@ -764,6 +813,25 @@ export async function getProjectFeaturesForUser(user: UserRecord, projectKey: st
   }
 
   if (user.is_admin) {
+    if (adminHasCustomPermissions(user)) {
+      const result = await query<{ feature_key: string }>(
+        `
+          SELECT f.feature_key
+          FROM user_feature_grants ug
+          JOIN features f ON f.id = ug.feature_id
+          JOIN projects p ON p.id = f.project_id
+          WHERE ug.user_id = $1 AND p.project_key = $2 AND p.status = 'active' AND f.status = 'active'
+          ORDER BY f.feature_key
+        `,
+        [user.id, projectKey],
+      );
+
+      if (result.rowCount === 0) {
+        throw new ForbiddenError(`User has no access to project: ${projectKey}`);
+      }
+
+      return result.rows.map((row) => row.feature_key);
+    }
     return listProjectFeatureKeys(projectKey);
   }
 

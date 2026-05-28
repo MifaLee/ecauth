@@ -126,7 +126,7 @@ async function upsertOrgProvisionedUser(client: PoolClient, member: EcOrgApiUser
   const isBootstrap = serverConfig.platformAdminIdentifiers.includes(ecUserId.toLowerCase());
   const isDefaultAdmin = DEFAULT_ADMIN_EC_USER_IDS.has(ecUserId);
   const isAdmin = isBootstrap || isDefaultAdmin;
-  const nextStatus: UserStatus = isAdmin ? 'active' : (Number(member.status) === 1 ? 'disabled' : 'active');
+  const nextStatus: UserStatus = isAdmin ? 'active' : (Number(member.status) === 1 ? 'active' : 'disabled');
   const reviewNote = 'Provisioned from EC organization sync';
   if (!existing) {
     const created = await client.query<UserRecord>(

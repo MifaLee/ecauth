@@ -11,6 +11,7 @@ export interface UserRecord {
   display_name: string;
   status: UserStatus;
   is_admin: boolean;
+  admin_permission_mode: 'all' | 'custom';
   provision_source: 'first_login' | 'org_sync';
   review_note: string | null;
   approved_by: string | null;
@@ -92,6 +93,7 @@ export interface ProjectManifestInput {
 
 export interface AccessProfile {
   isAdmin: boolean;
+  adminPermissionMode?: 'all' | 'custom';
   projects: Array<{
     projectKey: string;
     projectName: string;

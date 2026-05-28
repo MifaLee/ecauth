@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS users (
   display_name TEXT NOT NULL,
   status TEXT NOT NULL CHECK (status IN ('pending_review', 'active', 'rejected', 'disabled')),
   is_admin BOOLEAN NOT NULL DEFAULT FALSE,
+  admin_permission_mode TEXT NOT NULL DEFAULT 'all' CHECK (admin_permission_mode IN ('all', 'custom')),
   provision_source TEXT NOT NULL DEFAULT 'first_login' CHECK (provision_source IN ('first_login', 'org_sync')),
   review_note TEXT,
   approved_by UUID REFERENCES users(id),
@@ -32,10 +33,14 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS ec_user_id TEXT;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS ec_dept_id BIGINT;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS ec_title TEXT;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS provision_source TEXT NOT NULL DEFAULT 'first_login';
+ALTER TABLE users ADD COLUMN IF NOT EXISTS admin_permission_mode TEXT NOT NULL DEFAULT 'all';
 
 ALTER TABLE users DROP CONSTRAINT IF EXISTS users_provision_source_check;
 ALTER TABLE users
   ADD CONSTRAINT users_provision_source_check CHECK (provision_source IN ('first_login', 'org_sync'));
+ALTER TABLE users DROP CONSTRAINT IF EXISTS users_admin_permission_mode_check;
+ALTER TABLE users
+  ADD CONSTRAINT users_admin_permission_mode_check CHECK (admin_permission_mode IN ('all', 'custom'));
 
 CREATE UNIQUE INDEX IF NOT EXISTS users_ec_user_id_unique ON users (ec_user_id) WHERE ec_user_id IS NOT NULL;
 CREATE UNIQUE INDEX IF NOT EXISTS users_email_unique ON users (LOWER(email)) WHERE email IS NOT NULL;
@@ -184,5 +189,5 @@ BEFORE UPDATE ON ec_org_grant_rules
 FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 INSERT INTO users (ec_user_id, display_name, status, is_admin, provision_source, review_note, approved_at)
-VALUES ('191504', 'Admin', 'active', TRUE, 'first_login', 'Preconfigured admin', NOW())
+VALUES ('REDACTED_ADMIN_ID', 'Admin', 'active', TRUE, 'first_login', 'Preconfigured admin', NOW())
 ON CONFLICT (ec_user_id) WHERE ec_user_id IS NOT NULL DO NOTHING;

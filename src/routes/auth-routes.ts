@@ -172,7 +172,7 @@ export function createAuthRouter(): Router {
 
         try {
           const features = await getProjectFeaturesForUser(user, oauthContext.projectKey);
-          const token = signProjectToken(user.id, oauthContext.projectKey, features);
+          const token = signProjectToken(user, oauthContext.projectKey, features);
           res.redirect(appendQuery(oauthContext.returnTo, {
             token,
             projectKey: oauthContext.projectKey,
@@ -246,7 +246,7 @@ export function createAuthRouter(): Router {
     asyncHandler(async (req, res) => {
       const projectKey = readNonEmptyString(req.body.projectKey, 'projectKey');
       const features = await getProjectFeaturesForUser(req.currentUser!, projectKey);
-      const token = signProjectToken(req.currentUser!.id, projectKey, features);
+      const token = signProjectToken(req.currentUser!, projectKey, features);
       res.json({ projectKey, features, token });
     }),
   );

@@ -7,6 +7,8 @@ interface ProjectTokenPayload {
   sub: string;
   projectKey: string;
   features: string[];
+  isAdmin?: boolean;
+  adminPermissionMode?: 'all' | 'custom';
   type: 'project';
 }
 
@@ -48,11 +50,13 @@ export function verifySessionToken(token: string): SessionClaims | null {
   }
 }
 
-export function signProjectToken(userId: string, projectKey: string, features: string[]): string {
+export function signProjectToken(user: UserRecord, projectKey: string, features: string[]): string {
   const payload: ProjectTokenPayload = {
-    sub: userId,
+    sub: user.id,
     projectKey,
     features,
+    isAdmin: user.is_admin,
+    adminPermissionMode: user.admin_permission_mode ?? 'all',
     type: 'project',
   };
 

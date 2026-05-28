@@ -10,6 +10,7 @@
 
   var state = {
     activePage: 'dashboard',
+    noticeScope: null,
     session: null,
     users: [],
     projects: [],
@@ -55,8 +56,10 @@
     return String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
-  function showNotice(msg, isError) {
+  function showNotice(msg, isError, scope) {
+    state.noticeScope = scope || null;
     if (!msg) { noticeBox.style.display = 'none'; noticeBox.classList.remove('error'); return; }
+    if (scope && state.activePage !== scope) { noticeBox.style.display = 'none'; noticeBox.classList.remove('error'); return; }
     noticeBox.style.display = 'block';
     noticeBox.classList.toggle('error', !!isError);
     noticeBox.textContent = msg;
@@ -87,15 +90,24 @@
     document.querySelectorAll('.page').forEach(function (n) { n.classList.toggle('active', n.id === 'page-' + page); });
     document.querySelectorAll('.nav-item').forEach(function (n) { n.classList.toggle('active', n.getAttribute('data-page') === page); });
     pageTitle.textContent = pageMeta[page].title;
+    if (state.noticeScope && state.noticeScope !== page) showNotice('');
   }
 
-  function permChips(perms) {
-    if (!perms || !perms.projects || !perms.projects.length) return '<span class="muted">\u2014</span>';
-    return perms.projects.map(function (p) {
-      return p.features.map(function (f) {
-        return '<span class="perm-chip">' + esc(p.projectKey + ' / ' + f.featureKey) + '</span>';
-      }).join('');
-    }).join('');
+  function permissionSummary(perms) {
+    if (!perms || !perms.projects || !perms.projects.length) return '无权限';
+    var count = perms.projects.reduce(function (sum, p) { return sum + (p.features ? p.features.length : 0); }, 0);
+    if (perms.isAdmin && perms.adminPermissionMode === 'all') return '管理员：全部权限';
+    return perms.projects.length + ' 个应用，' + count + ' 项权限';
+  }
+
+  function hasGrantedPermissions(perms) {
+    if (!perms || !perms.projects || !perms.projects.length) return false;
+    if (perms.isAdmin && perms.adminPermissionMode === 'all') return true;
+    return perms.projects.some(function (p) { return p.features && p.features.length > 0; });
+  }
+
+  function featureLabel(feature) {
+    return feature.featureName || feature.featureKey;
   }
 
   /* ── Render ── */
@@ -145,7 +157,14 @@
       return;
     }
 
-    usersTableBody.innerHTML = state.users.map(function (u) {
+    var sortedUsers = state.users.slice().sort(function (a, b) {
+      var aHas = hasGrantedPermissions(a.permissions) ? 0 : 1;
+      var bHas = hasGrantedPermissions(b.permissions) ? 0 : 1;
+      if (aHas !== bHas) return aHas - bHas;
+      return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+    });
+
+    usersTableBody.innerHTML = sortedUsers.map(function (u) {
       var tooltip = '最近登录: ' + fmtTime(u.lastLoginAt);
       var subInfo = u.employeeId || u.ecUserId || u.id;
       var statusCol = statusPill(u.status);
@@ -172,7 +191,7 @@
         + '<td>' + statusCol + '</td>'
         + '<td>' + deptCell + '</td>'
         + '<td style="position:relative">'
-        + permChips(u.permissions)
+        + '<span class="' + (hasGrantedPermissions(u.permissions) ? 'permission-summary-strong' : 'muted') + '">' + esc(permissionSummary(u.permissions)) + '</span>'
         + '<div class="user-row-actions">'
         + '<button class="' + esc(primaryClass) + '" data-action="review" data-review-action="' + esc(primaryAction) + '" type="button">' + esc(primaryLabel) + '</button>'
         + '<button class="btn btn-xs btn-outline" data-action="open-grant" type="button">授权</button>'
@@ -271,8 +290,8 @@
     orgMembersTableBody.innerHTML = state.orgMembers.map(function (m) {
       var ck = state.selectedOrgUserIds.has(m.ecUserId) ? ' checked' : '';
       var ecStatusPill = String(m.status) === '1'
-        ? '<span class="pill pill-unknown">EC 禁用</span>'
-        : '<span class="pill pill-active">EC 正常</span>';
+        ? '<span class="pill pill-active">EC 正常</span>'
+        : '<span class="pill pill-unknown">EC 禁用</span>';
 
       var memberInfo = '<div class="person-cell">'
         + '<strong>' + esc(m.userName) + '</strong>'
@@ -293,7 +312,7 @@
         + '<td>' + memberInfo + ' ' + ecStatusPill + '</td>'
         + '<td>' + deptCell + '</td>'
         + '<td>' + localAccount + '</td>'
-        + '<td>' + permChips(m.permissions) + '</td></tr>';
+        + '<td><span class="muted">' + esc(permissionSummary(m.permissions)) + '</span></td></tr>';
     }).join('');
   }
 
@@ -319,14 +338,14 @@
       return;
     }
 
-    var html = state.projects.map(function (proj) {
+    var html = '<div class="permission-board">' + state.projects.map(function (proj) {
       var allGranted = proj.features.length > 0 && proj.features.every(function (f) {
         return granted.has(proj.projectKey + '||' + f.featureKey);
       });
       var projChecked = allGranted ? ' checked' : '';
       var projId = 'gm-p-' + esc(proj.projectKey);
 
-      var h = '<div class="grant-project-group">'
+      var h = '<div class="permission-project-card grant-project-group">'
         + '<label class="grant-project-label">'
         + '<input type="checkbox" id="' + projId + '" data-gm-project="' + esc(proj.projectKey) + '"' + projChecked + '>'
         + '<span>' + esc(proj.projectName) + ' (' + esc(proj.projectKey) + ')</span>'
@@ -336,12 +355,12 @@
         var fChecked = granted.has(proj.projectKey + '||' + f.featureKey) ? ' checked' : '';
         h += '<label class="grant-feature-item">'
           + '<input type="checkbox" data-gm-feature="' + esc(proj.projectKey) + '||' + esc(f.featureKey) + '"' + fChecked + '>'
-          + '<span>' + esc(f.featureKey) + '</span>'
+          + '<span>' + esc(featureLabel(f)) + '</span>'
           + '</label>';
       });
       h += '</div></div>';
       return h;
-    }).join('');
+    }).join('') + '</div>';
     grantModalBody.innerHTML = html;
     grantModal.classList.add('open');
   }
@@ -363,9 +382,9 @@
       return;
     }
 
-    var html = state.projects.map(function (proj) {
+    var html = '<div class="permission-board">' + state.projects.map(function (proj) {
       var projId = 'gm-p-' + esc(proj.projectKey);
-      var h = '<div class="grant-project-group">'
+      var h = '<div class="permission-project-card grant-project-group">'
         + '<label class="grant-project-label">'
         + '<input type="checkbox" id="' + projId + '" data-gm-project="' + esc(proj.projectKey) + '">'
         + '<span>' + esc(proj.projectName) + ' (' + esc(proj.projectKey) + ')</span>'
@@ -374,12 +393,12 @@
       proj.features.forEach(function (f) {
         h += '<label class="grant-feature-item">'
           + '<input type="checkbox" data-gm-feature="' + esc(proj.projectKey) + '||' + esc(f.featureKey) + '">'
-          + '<span>' + esc(f.featureKey) + '</span>'
+          + '<span>' + esc(featureLabel(f)) + '</span>'
           + '</label>';
       });
       h += '</div></div>';
       return h;
-    }).join('');
+    }).join('') + '</div>';
     grantModalBody.innerHTML = html;
     grantModal.classList.add('open');
   }
@@ -704,7 +723,7 @@
       .then(function (payload) {
         return Promise.all([loadUsers(), loadOrgUnits(), loadOrgMembers()]).then(function () { return payload; });
       })
-      .then(function (payload) { renderDashboard(); showNotice('同步完成：部门 ' + payload.summary.unitCount + ' 个，成员 ' + payload.summary.memberCount + ' 人'); })
+      .then(function (payload) { renderDashboard(); showNotice('同步完成：部门 ' + payload.summary.unitCount + ' 个，成员 ' + payload.summary.memberCount + ' 人', false, 'organization'); })
       .catch(function (err) { showNotice(err.message, true); });
   });
 

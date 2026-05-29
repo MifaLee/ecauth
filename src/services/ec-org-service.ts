@@ -128,6 +128,7 @@ async function upsertOrgProvisionedUser(client: PoolClient, member: EcOrgApiUser
   const isAdmin = isBootstrap || isDefaultAdmin;
   const nextStatus: UserStatus = isAdmin ? 'active' : (Number(member.status) === 1 ? 'active' : 'disabled');
   const reviewNote = 'Provisioned from EC organization sync';
+  const displayName = member.userName.trim() || member.account?.trim() || `ec_${member.userId}`;
   if (!existing) {
     const created = await client.query<UserRecord>(
       `
@@ -146,7 +147,7 @@ async function upsertOrgProvisionedUser(client: PoolClient, member: EcOrgApiUser
         VALUES ($1, $2, $3, $4, $5, $6, $7, 'org_sync', $8, CASE WHEN $6 = 'active' THEN NOW() ELSE NULL END)
         RETURNING *
       `,
-      [ecUserId, member.deptId || null, member.title?.trim() || null, member.account?.trim() || null, member.userName.trim(), nextStatus, isAdmin, reviewNote],
+      [ecUserId, member.deptId || null, member.title?.trim() || null, member.account?.trim() || null, displayName, nextStatus, isAdmin, reviewNote],
     );
     return { user: created.rows[0], created: true };
   }
@@ -159,7 +160,7 @@ async function upsertOrgProvisionedUser(client: PoolClient, member: EcOrgApiUser
         ec_dept_id = COALESCE($3, ec_dept_id),
         ec_title = COALESCE($4, ec_title),
         mobile = COALESCE($5, mobile),
-        display_name = $6,
+        display_name = COALESCE(NULLIF($6, ''), display_name),
         status = CASE WHEN is_admin = TRUE AND status = 'active' THEN status ELSE $7 END,
         is_admin = $9,
         provision_source = 'org_sync',
@@ -172,7 +173,7 @@ async function upsertOrgProvisionedUser(client: PoolClient, member: EcOrgApiUser
       WHERE id = $1
       RETURNING *
     `,
-    [existing.id, ecUserId, member.deptId || null, member.title?.trim() || null, member.account?.trim() || null, member.userName.trim(), nextStatus, reviewNote, isAdmin],
+    [existing.id, ecUserId, member.deptId || null, member.title?.trim() || null, member.account?.trim() || null, displayName, nextStatus, reviewNote, isAdmin],
   );
 
   return { user: updated.rows[0], created: false };
@@ -302,7 +303,7 @@ export async function syncEcOrganization(actorUserId?: string): Promise<{
           ON CONFLICT (ec_user_id)
           DO UPDATE SET
             dept_id = EXCLUDED.dept_id,
-            user_name = EXCLUDED.user_name,
+            user_name = COALESCE(NULLIF(EXCLUDED.user_name, ''), ec_org_members.user_name),
             title = EXCLUDED.title,
             account = EXCLUDED.account,
             status = EXCLUDED.status,
@@ -314,7 +315,7 @@ export async function syncEcOrganization(actorUserId?: string): Promise<{
         [
           String(member.userId),
           member.deptId || null,
-          member.userName.trim(),
+          member.userName.trim() || member.account?.trim() || String(member.userId),
           member.title?.trim() || null,
           member.account?.trim() || null,
           Number(member.status ?? 0),

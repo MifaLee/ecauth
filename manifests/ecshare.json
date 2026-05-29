@@ -1,0 +1,32 @@
+{
+  "projectKey": "ecshare",
+  "name": "EC文档共享中心",
+  "description": "乐享知识库文档导入、上传管理与H5分享平台",
+  "features": [
+    {
+      "key": "kb:import",
+      "name": "导入乐享知识库文档",
+      "description": "允许浏览乐享知识库目录并导入文档到本项目"
+    },
+    {
+      "key": "doc:upload",
+      "name": "上传本地文档",
+      "description": "允许上传本地文档文件到项目目录"
+    },
+    {
+      "key": "doc:manage",
+      "name": "管理项目文档",
+      "description": "允许查看和管理已导入/上传的文档列表"
+    },
+    {
+      "key": "share:create",
+      "name": "创建分享链接",
+      "description": "允许为文档生成带关键词追踪的H5分享链接"
+    },
+    {
+      "key": "analytics:view",
+      "name": "查看分享统计",
+      "description": "允许查看文档分享的点击量、阅读时长等统计数据"
+    }
+  ]
+}

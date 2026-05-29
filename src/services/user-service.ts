@@ -263,7 +263,7 @@ export async function syncUserFromEcLogin(profile: EcIdentityProfile): Promise<U
             ec_title = COALESCE($5, ec_title),
             email = COALESCE($6, email),
             mobile = COALESCE($7, mobile),
-            display_name = $8,
+            display_name = COALESCE(NULLIF($8, ''), display_name),
             status = $9,
             is_admin = $10,
             provision_source = CASE

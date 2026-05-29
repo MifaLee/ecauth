@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken';
 
 export interface ProjectAccessTokenClaims {
   sub: string;
+  displayName: string;
   projectKey: string;
   features: string[];
   type: 'project';
@@ -30,6 +31,7 @@ export function verifyProjectAccessToken(params: {
 
   return {
     sub: String(claims.sub),
+    displayName: String(claims.displayName ?? ''),
     projectKey: String(claims.projectKey),
     features: claims.features.map((item) => String(item)),
     type: 'project',

@@ -5,6 +5,7 @@ import type { SessionClaims, UserRecord } from './models';
 
 interface ProjectTokenPayload {
   sub: string;
+  displayName: string;
   projectKey: string;
   features: string[];
   isAdmin?: boolean;
@@ -53,6 +54,7 @@ export function verifySessionToken(token: string): SessionClaims | null {
 export function signProjectToken(user: UserRecord, projectKey: string, features: string[]): string {
   const payload: ProjectTokenPayload = {
     sub: user.id,
+    displayName: user.display_name,
     projectKey,
     features,
     isAdmin: user.is_admin,

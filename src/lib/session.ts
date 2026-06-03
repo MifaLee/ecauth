@@ -5,6 +5,7 @@ import type { SessionClaims, UserRecord } from './models';
 
 interface ProjectTokenPayload {
   sub: string;
+  ecUserId: string | null;
   displayName: string;
   projectKey: string;
   features: string[];
@@ -54,6 +55,7 @@ export function verifySessionToken(token: string): SessionClaims | null {
 export function signProjectToken(user: UserRecord, projectKey: string, features: string[]): string {
   const payload: ProjectTokenPayload = {
     sub: user.id,
+    ecUserId: user.ec_user_id,
     displayName: user.display_name,
     projectKey,
     features,

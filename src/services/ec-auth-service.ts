@@ -192,7 +192,7 @@ function normalizeProfile(rawProfile: Record<string, unknown>): EcIdentityProfil
 
   const givenName = firstString(rawProfile, ['given_name', 'givenName']);
   const familyName = firstString(rawProfile, ['family_name', 'familyName']);
-  const fallbackName = [familyName, givenName].filter(Boolean).join('') || providerUserId;
+  const fallbackName = [familyName, givenName].filter(Boolean).join('') || '';
   const displayName =
     firstString(rawProfile, ['emp_name', 'name', 'nickname', 'display_name', 'displayName'])
     ?? fallbackName;
